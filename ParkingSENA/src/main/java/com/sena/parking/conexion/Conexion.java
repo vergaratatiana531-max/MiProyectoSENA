@@ -1,4 +1,3 @@
-
 package com.sena.parking.conexion;
 
 import java.sql.Connection;
@@ -8,24 +7,27 @@ import java.sql.SQLException;
 public class Conexion {
 
     private static final String URL =
-            "jdbc:mysql://localhost:3306/ParkingSENA?useSSL=false&serverTimezone=UTC";
+        "jdbc:mysql://localhost:3306/ParkingSENA?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC";
 
-    private static final String USUARIO = "root";
+    private static final String USER = "root";
 
     public static Connection obtenerConexion() throws SQLException {
+        String password = System.getenv("PARKINGSENA_DB_PASSWORD");
+
+        if (password == null || password.isEmpty()) {
+            throw new SQLException("Falta configurar PARKINGSENA_DB_PASSWORD");
+        }
 
         try {
             Class.forName("com.mysql.cj.jdbc.Driver");
         } catch (ClassNotFoundException e) {
-            throw new SQLException("No se encontró el controlador de MySQL.", e);
+            throw new SQLException("No se encontró el controlador de MySQL", e);
         }
 
-        String password = System.getenv("PARKINGSENA_DB_PASSWORD");
+        return DriverManager.getConnection(URL, USER, password);
+    }
 
-        if (password == null || password.isBlank()) {
-            throw new SQLException("No se ha configurado la contraseña de MySQL.");
-        }
-
-        return DriverManager.getConnection(URL, USUARIO, password);
+    public static Connection conectar() throws SQLException {
+        return obtenerConexion();
     }
 }
